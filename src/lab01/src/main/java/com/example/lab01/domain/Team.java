@@ -1,8 +1,13 @@
 package com.example.lab01.domain;
 
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Team {
@@ -10,12 +15,28 @@ public class Team {
 	@Id
 	@GeneratedValue
 	private Long id;
-	
+
 	private String name;
-	
+
 	private String location;
-	
+
 	private String mascot;
+
+	@OneToMany(cascade=CascadeType.ALL)
+	@JoinColumn(name="teamId")
+	private Set<Player> players;
+
+	public Team() {}
+
+	public Team(String name, String location, String mascot, Set<Player> players) {
+		this();
+		this.name = name;
+		this.location = location;
+		this.mascot = mascot;
+		this.players = players;
+	}
+
+
 
 	public Long getId() {
 		return id;
@@ -47,6 +68,14 @@ public class Team {
 
 	public void setMascot(String mascot) {
 		this.mascot = mascot;
+	}
+
+	public Set<Player> getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(Set<Player> players) {
+		this.players = players;
 	}
 
 }
