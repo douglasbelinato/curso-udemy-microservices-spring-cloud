@@ -3,6 +3,7 @@ package demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import demo.dao.NounClient;
 import demo.dao.WordDao;
 
 /**
@@ -17,7 +18,7 @@ public class SentenceServiceImpl implements SentenceService {
 	private WordDao subjectService;
 	private WordDao articleService;
 	private WordDao adjectiveService;
-	private WordDao nounService;
+	private NounClient nounService;
 	
 
 	/**
@@ -57,7 +58,7 @@ public class SentenceServiceImpl implements SentenceService {
 	}
 
 	@Autowired
-	public void setNounService(WordDao nounService) {
+	public void setNounService(NounClient nounService) {
 		this.nounService = nounService;
 	}	
 	
