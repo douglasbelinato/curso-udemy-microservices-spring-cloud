@@ -23,8 +23,13 @@ public class WordServiceImpl implements WordService {
 	
 	
 	@Override
+	@HystrixCommand(fallbackMethod = "getSubjectFallback")
 	public Word getSubject() {
 		return subjectClient.getWord();
+	}
+	
+	public Word getSubjectFallback() {
+		return new Word("someone");
 	}
 	
 	@Override
@@ -48,7 +53,12 @@ public class WordServiceImpl implements WordService {
 	}
 	
 	@Override
+	@HystrixCommand(fallbackMethod="getNounFallback")
 	public Word getNoun() {
 		return nounClient.getWord();
-	}	
+	}
+	
+	public Word getNounFallback() {
+		return new Word("something");
+	}
 }
