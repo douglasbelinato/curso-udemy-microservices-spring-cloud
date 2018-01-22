@@ -3,6 +3,8 @@ package demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
 import demo.dao.AdjectiveClient;
 import demo.dao.ArticleClient;
 import demo.dao.NounClient;
@@ -36,8 +38,13 @@ public class WordServiceImpl implements WordService {
 	}
 	
 	@Override
+	@HystrixCommand(fallbackMethod="getAdjectiveFallback")
 	public Word getAdjective() {
 		return adjectiveClient.getWord();
+	}
+	
+	public Word getAdjectiveFallback() {
+		return new Word("");
 	}
 	
 	@Override
