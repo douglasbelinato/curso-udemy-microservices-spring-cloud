@@ -4,8 +4,8 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/kennyk65/Microservices-With-Spring-Student-Files
-          searchPaths: ConfigData
+          uri: https://github.com/douglasbelinato/curso-udemy-microservices-spring-cloud
+          searchPaths: configdata
 server:
   port: 8001
 # For simplicity, disable security when posting to bus/refresh:  
