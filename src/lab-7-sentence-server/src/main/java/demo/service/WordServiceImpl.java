@@ -1,5 +1,7 @@
 package demo.service;
 
+import java.util.concurrent.Executor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,9 @@ import demo.dao.NounClient;
 import demo.dao.SubjectClient;
 import demo.dao.VerbClient;
 import demo.domain.Word;
+import demo.domain.Word.Role;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 @Service
 public class WordServiceImpl implements WordService {
@@ -20,45 +25,72 @@ public class WordServiceImpl implements WordService {
 	@Autowired ArticleClient articleClient;
 	@Autowired AdjectiveClient adjectiveClient;
 	@Autowired NounClient nounClient;
-	
-	
-	@Override
-	@HystrixCommand(fallbackMethod = "getSubjectFallback")
-	public Word getSubject() {
-		return subjectClient.getWord();
-	}
-	
-	public Word getSubjectFallback() {
-		return new Word("someone");
-	}
+	@Autowired Executor executor;	//	Source of threads
 	
 	@Override
-	public Word getVerb() {
-		return verbClient.getWord();
+	@HystrixCommand(fallbackMethod="getFallbackSubject")
+	public Observable<Word> getSubject() {
+		// This 'reactive' observable is backed by a regular Java Callable, 
+		// which can run in a different thread:
+		return Observable.fromCallable(
+			() ->  new Word (subjectClient.getWord().getWord(), Role.subject)
+		).subscribeOn(Schedulers.from(executor));
 	}
 	
 	@Override
-	public Word getArticle() {
-		return articleClient.getWord();
+	@HystrixCommand(fallbackMethod="getFallbackVerb")
+	public Observable<Word> getVerb() {
+		return Observable.fromCallable(
+			() ->  new Word (verbClient.getWord().getWord(), Role.verb)
+		).subscribeOn(Schedulers.from(executor));
 	}
 	
 	@Override
-	@HystrixCommand(fallbackMethod="getAdjectiveFallback")
-	public Word getAdjective() {
-		return adjectiveClient.getWord();
-	}
-	
-	public Word getAdjectiveFallback() {
-		return new Word("");
+	@HystrixCommand(fallbackMethod="getFallbackArticle")
+	public Observable<Word> getArticle() {
+		return Observable.fromCallable(
+			() ->  new Word (articleClient.getWord().getWord(), Role.article)
+		).subscribeOn(Schedulers.from(executor));
 	}
 	
 	@Override
-	@HystrixCommand(fallbackMethod="getNounFallback")
-	public Word getNoun() {
-		return nounClient.getWord();
+	@HystrixCommand(fallbackMethod="getFallbackAdjective")
+	public Observable<Word> getAdjective() {
+		return Observable.fromCallable(
+			() ->  new Word (adjectiveClient.getWord().getWord(), Role.adjective)
+		).subscribeOn(Schedulers.from(executor));
 	}
 	
-	public Word getNounFallback() {
-		return new Word("something");
+	@Override
+	@HystrixCommand(fallbackMethod="getFallbackNoun")
+	public Observable<Word> getNoun() {
+		return Observable.fromCallable(
+			() ->  new Word (nounClient.getWord().getWord(), Role.noun)
+		).subscribeOn(Schedulers.from(executor));
 	}
+	
+	
+	// Fallback methods
+	
+	public Word getFallbackSubject() {
+		return new Word("Someone", Role.subject);
+	}
+	
+	public Word getFallbackVerb() {
+		return new Word("does", Role.verb);
+	}
+	
+	public Word getFallbackArticle() {
+		return new Word("", Role.article);
+	}
+	
+	public Word getFallbackAdjective() {
+		return new Word("", Role.adjective);
+	}
+	
+	public Word getFallbackNoun() {
+		return new Word("something", Role.noun);
+	}
+	
+
 }
